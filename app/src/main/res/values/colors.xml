@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="segmented_color">#FFeb6c9f</color>
+    <color name="segmented_around_color">#FFf1b9d0</color>
+    <color name="bg_worst">#FF1565C0</color>
+    <color name="bg_bad">#FF40C4FF</color>
+    <color name="bg_normal">#FF00E676</color>
+    <color name="bg_good">#FFFFD600</color>
+    <color name="bg_best">#FFFF1744</color>
+</resources>

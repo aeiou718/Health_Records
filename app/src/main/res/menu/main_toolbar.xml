@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/health_calendar"
+        android:title="@string/health_calendar"
+        android:icon="@drawable/health_calendar"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/taking_alarm"
+        android:title="@string/taking_alarm"
+        android:icon="@drawable/alarm_timer"
+        app:showAsAction="ifRoom"/>
+
+</menu>

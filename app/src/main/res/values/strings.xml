@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">健康記録</string>
+    <string name="health_calendar">健康カレンダー</string>
+    <string name="taking_alarm">服用時間</string>
+    <string name="day">00</string>
+    <string name="records_default">記録したいこと</string>
+</resources>
