@@ -9,4 +9,5 @@
     <color name="bg_normal">#FF00E676</color>
     <color name="bg_good">#FFFFD600</color>
     <color name="bg_best">#FFFF1744</color>
+    <color name="transparent">#00000000</color>
 </resources>

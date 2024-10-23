@@ -1,11 +1,13 @@
 package com.websarva.wings.android.healthrecords;
 
+import android.widget.RadioGroup;
+
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 @Entity(tableName = "record_entity")
 public class RecordEntity {
-    public RecordEntity(int health, boolean morning, boolean evening, boolean afternoon) {
+    public RecordEntity(RadioGroup health, boolean morning, boolean evening, boolean afternoon) {
         this.health = health;
         this.morning = morning;
         this.evening = evening;
@@ -14,7 +16,7 @@ public class RecordEntity {
 
     @PrimaryKey(autoGenerate = true)
     private int id;             //ID
-    private int health;         //健康状態
+    private RadioGroup health;         //健康状態
     private boolean morning;    //朝
     private boolean evening;    //昼
     private boolean afternoon;  //夕方
@@ -27,11 +29,11 @@ public class RecordEntity {
         this.id = id;
     }
 
-    public int getHealth() {
+    public RadioGroup getHealth() {
         return health;
     }
 
-    public void setHealth(int health) {
+    public void setHealth(RadioGroup health) {
         this.health = health;
     }
 
