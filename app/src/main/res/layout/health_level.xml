@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:id="@+id/health_level"
     android:orientation="vertical">
 
@@ -11,7 +11,7 @@
     <RadioGroup
         android:id="@+id/health_radio"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="90dp"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -24,7 +24,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@drawable/segmented_worst"
+            android:foreground="@drawable/segmented_worst"
             android:button="@null"
             android:importantForAccessibility="no" />
 
@@ -42,7 +42,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@drawable/segmented_normal"
+            android:foreground="@drawable/segmented_normal"
             android:button="@null"
             android:importantForAccessibility="no" />
 
@@ -51,7 +51,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@drawable/segmented_good"
+            android:foreground="@drawable/segmented_good"
             android:button="@null"
             android:importantForAccessibility="no" />
 
@@ -60,7 +60,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@drawable/segmented_best"
+            android:foreground="@drawable/segmented_best"
             android:button="@null"
             android:importantForAccessibility="no" />
 

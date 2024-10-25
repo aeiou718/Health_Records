@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="segmented_color">#FFeb6c9f</color>
-    <color name="segmented_around_color">#FFf1b9d0</color>
-    <color name="bg_worst">#FF1565C0</color>
-    <color name="bg_bad">#FF40C4FF</color>
-    <color name="bg_normal">#FF00E676</color>
-    <color name="bg_good">#FFFFD600</color>
-    <color name="bg_best">#FFFF1744</color>
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+
+    <color name="segmented_color">#eb6c9f</color>
+    <color name="segmented_around_color">#f1b9d0</color>
+
+    <color name="bg_worst">#2962FF</color>
+    <color name="bg_bad">#40C4FF</color>
+    <color name="bg_normal">#69F0AE</color>
+    <color name="bg_good">#FFD600</color>
+    <color name="bg_best">#FF5252</color>
+
+    <color name="morning_color">#FFD600</color>
+    <color name="noon_color">#40C4FF</color>
+    <color name="night_color">#3949AB</color>
     <color name="transparent">#00000000</color>
 </resources>

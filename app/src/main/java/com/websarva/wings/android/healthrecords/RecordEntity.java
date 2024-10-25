@@ -1,5 +1,6 @@
 package com.websarva.wings.android.healthrecords;
 
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 import androidx.room.Entity;
@@ -7,7 +8,7 @@ import androidx.room.PrimaryKey;
 
 @Entity(tableName = "record_entity")
 public class RecordEntity {
-    public RecordEntity(RadioGroup health, boolean morning, boolean evening, boolean afternoon) {
+    public RecordEntity(RadioGroup health, RadioButton morning, RadioButton evening, RadioButton afternoon) {
         this.health = health;
         this.morning = morning;
         this.evening = evening;
@@ -17,9 +18,9 @@ public class RecordEntity {
     @PrimaryKey(autoGenerate = true)
     private int id;             //ID
     private RadioGroup health;         //健康状態
-    private boolean morning;    //朝
-    private boolean evening;    //昼
-    private boolean afternoon;  //夕方
+    private RadioButton morning;    //朝
+    private RadioButton evening;    //昼
+    private RadioButton afternoon;  //夕方
 
     public int getId() {
         return id;
@@ -37,27 +38,27 @@ public class RecordEntity {
         this.health = health;
     }
 
-    public boolean isMorning() {
+    public RadioButton isMorning() {
         return morning;
     }
 
-    public void setMorning(boolean morning) {
+    public void setMorning(RadioButton morning) {
         this.morning = morning;
     }
 
-    public boolean isEvening() {
+    public RadioButton isEvening() {
         return evening;
     }
 
-    public void setEvening(boolean evening) {
+    public void setEvening(RadioButton evening) {
         this.evening = evening;
     }
 
-    public boolean isAfternoon() {
+    public RadioButton isAfternoon() {
         return afternoon;
     }
 
-    public void setAfternoon(boolean afternoon) {
+    public void setAfternoon(RadioButton afternoon) {
         this.afternoon = afternoon;
     }
 
