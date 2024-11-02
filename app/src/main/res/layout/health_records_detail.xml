@@ -14,7 +14,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <include layout="@layout/health_level" />
+        <include layout="@layout/parts_health_level" />
 
         <!--        <androidx.constraintlayout.widget.ConstraintLayout-->
         <!--            android:id="@+id/record_health_level"-->
@@ -28,7 +28,7 @@
 
         <!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
 
-        <include layout="@layout/dosage_time_check" />
+        <include layout="@layout/parts_dosage_time_check" />
 
         <!--        <androidx.constraintlayout.widget.ConstraintLayout-->
         <!--            android:id="@+id/record_dosage"-->
@@ -62,18 +62,20 @@
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/record_detail_field"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_marginTop="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/record_detail_text"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:hint="@string/records_default"
-                android:inputType="text|textNoSuggestions"
+                android:inputType="text|textMultiLine"
+                android:gravity="start"
                 android:textSize="24sp" />
 
         </com.google.android.material.textfield.TextInputLayout>

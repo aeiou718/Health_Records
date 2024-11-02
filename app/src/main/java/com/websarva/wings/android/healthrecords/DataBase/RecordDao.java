@@ -1,4 +1,4 @@
-package com.websarva.wings.android.healthrecords;
+package com.websarva.wings.android.healthrecords.DataBase;
 
 import androidx.room.Dao;
 import androidx.room.Delete;

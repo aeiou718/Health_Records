@@ -1,17 +1,10 @@
 package com.websarva.wings.android.healthrecords;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.CheckBox;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
@@ -22,6 +15,11 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.websarva.wings.android.healthrecords.DataBase.AppDataBase;
+import com.websarva.wings.android.healthrecords.DataBase.AppDataBaseSingleton;
+import com.websarva.wings.android.healthrecords.DataBase.RecordDao;
+import com.websarva.wings.android.healthrecords.DataBase.RecordEntity;
+
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -30,23 +28,22 @@ import java.util.concurrent.Executors;
 public class HealthRecordsDetail extends AppCompatActivity {
     List<RecordEntity> recordEntityList;
     Intent intent;
+    private AppDataBase adb;
     //health_level
-    RadioGroup health_level;   //健康状態
+    RadioGroup health_level_radio;
+    RadioButton rbHealth; //健康状態
     RadioButton worst;
     RadioButton bad;
     RadioButton normal;
     RadioButton good;
     RadioButton best;
     //dosage_time_check
-    CheckBox dosage_time_morning;    //服薬時間 朝食
-    CheckBox dosage_time_evening;    //服薬時間 昼食
-    CheckBox dosage_time_afternoon;  //服薬時間 夕食
+    boolean dosage_time_morning;    //服薬時間 朝食
+    boolean dosage_time_evening;    //服薬時間 昼食
+    boolean dosage_time_afternoon;  //服薬時間 夕食
     //health_records_detail;
     ExecutorService executorService;
     RadioGroup inHealth_level;
-    CheckBox inDosage_time_morning;
-    CheckBox inDosage_time_evening;
-    CheckBox inDosage_time_afternoon;
     String inDetail = "";
 
     @Override
@@ -60,31 +57,38 @@ public class HealthRecordsDetail extends AppCompatActivity {
             return insets;
         });
 
-        AppDataBase adb = AppDataBaseSingleton.getInstance(getApplicationContext());
+        adb = AppDataBaseSingleton.getInstance(getApplicationContext());
         executorService = Executors.newSingleThreadExecutor();
 
         //「保存」を押したときの挙動
         findViewById(R.id.check).setOnClickListener(v -> {
             intent = new Intent();
-            health_level = findViewById(R.id.health_radio);
-            health_level.setOnCheckedChangeListener((group, checkedId) -> {
-                worst = findViewById(R.id.worst);
-                bad = findViewById(R.id.bad);
-                normal = findViewById(R.id.normal);
-                good = findViewById(R.id.good);
-                best = findViewById(R.id.best);
-
+            health_level_radio = findViewById(R.id.health_radio);
+            health_level_radio.setOnCheckedChangeListener((group, checkedId) -> {
+                rbHealth = findViewById(checkedId);
+                intent.putExtra("health_level", rbHealth.getUrls());         //RadioButtonのIDをセット
             });
-            inDosage_time_morning = findViewById(R.id.morning_checkBox);
 
+            dosage_time_morning = findViewById(R.id.morning_checkBox).isPressed();
+            dosage_time_evening = findViewById(R.id.evening_checkBox).isPressed();
+            dosage_time_afternoon = findViewById(R.id.afternoon_checkBox).isPressed();
+
+            intent.putExtra("dosage_time_morning", dosage_time_morning);      //morningのCheckBoxの値をセット
+            intent.putExtra("dosage_time_evening", dosage_time_evening);      //eveningのCheckBoxの値をセット
+            intent.putExtra("dosage_time_afternoon", dosage_time_afternoon);  //afternoonのCheckBoxの値をセット
+
+            inDetail = findViewById(R.id.record_detail_text).toString();
+            intent.putExtra("detail", inDetail);                              //detailをセット
+
+            new RecordSave(adb, HealthRecordsDetail.this).execute(intent);
         });
     }
 
-    private class DataStore implements Runnable {
+    private class RecordSave implements Runnable {
         private final WeakReference<Activity> weakActivity;
         private final AppDataBase db;
 
-        private DataStore(AppDataBase db, Activity activity) {
+        private RecordSave(AppDataBase db, Activity activity) {
             this.db = db;
             weakActivity = new WeakReference<>(activity);
         }
@@ -92,15 +96,15 @@ public class HealthRecordsDetail extends AppCompatActivity {
         @Override
         public void run() {
             RecordDao recordDao = db.recordDao();
-            RecordEntity re_insert = new RecordEntity();
+            RecordEntity re_insert = new RecordEntity(rbHealth.getId(), rbHealth.isChecked(), dosage_time_morning, dosage_time_evening, dosage_time_afternoon, inDetail);
+            long id = recordDao.insert(re_insert);
 
-            new Handler(Looper.getMainLooper())
-                    .post(() -> onPostExecute());
+            new Handler(Looper.getMainLooper()).post(() -> onPostExecute(id));
         }
 
         void execute(Intent intent) {
             onPreExecute(intent);
-            executorService.submit(new DataStore(db, weakActivity.get()));
+            executorService.submit(new RecordSave(db, weakActivity.get()));
         }
 
         void onPreExecute(Intent intent) {
@@ -108,63 +112,10 @@ public class HealthRecordsDetail extends AppCompatActivity {
 
         }
 
-        void onPostExecute(List<RecordEntity> atList) {
-            recordEntityList = atList;
-            HealthLevelAdapter adapter = new HealthLevelAdapter(HealthRecordsDetail.this, recordEntityList);
-            health_level.setAdapter(adapter);
-
-        }
-    }
-
-    void updateList() {
-        HealthLevelAdapter adapter = new HealthLevelAdapter(HealthRecordsDetail.this, recordEntityList);
-
-    }
-
-    private class HealthLevelAdapter extends BaseAdapter {
-        private final List<RecordEntity> recordEntityList;
-        private final LayoutInflater inflater;
-
-        private HealthLevelAdapter(Context context, List<RecordEntity> recordEntityList) {
-            this.recordEntityList = recordEntityList;
-            this.inflater = LayoutInflater.from(context);
-        }
-
-        @Override
-        public int getCount() {
-            return recordEntityList.size();
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return recordEntityList.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return recordEntityList.get(position).getId();
-        }
-
-        @SuppressLint("InflateParams")
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            RecordEntity record = recordEntityList.get(position);
-
-            if (convertView == null) {
-                convertView = inflater.inflate(R.layout.health_level, null);
-            }
-            inHealth_level = convertView.findViewById(R.id.health_radio);
-            View finalConvertView = convertView;
-            inHealth_level.setOnCheckedChangeListener((group, checkedId) -> {
-                worst = finalConvertView.findViewById(R.id.worst);
-                bad = finalConvertView.findViewById(R.id.bad);
-                normal = finalConvertView.findViewById(R.id.normal);
-                good = finalConvertView.findViewById(R.id.good);
-                best = finalConvertView.findViewById(R.id.best);
-
-            });
-
-            return convertView;
+        void onPostExecute(long RE_id) {
+            intent.putExtra("setId", RE_id);
+            setResult(RESULT_OK, intent);
+            finish();
         }
     }
 }

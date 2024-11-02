@@ -1,4 +1,4 @@
-package com.websarva.wings.android.healthrecords;
+package com.websarva.wings.android.healthrecords.DataBase;
 
 import androidx.room.Database;
 import androidx.room.RoomDatabase;
