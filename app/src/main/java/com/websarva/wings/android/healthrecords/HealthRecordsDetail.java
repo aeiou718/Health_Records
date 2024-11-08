@@ -1,7 +1,6 @@
 package com.websarva.wings.android.healthrecords;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -15,35 +14,30 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.websarva.wings.android.healthrecords.DataBase.AppDataBase;
-import com.websarva.wings.android.healthrecords.DataBase.AppDataBaseSingleton;
-import com.websarva.wings.android.healthrecords.DataBase.RecordDao;
-import com.websarva.wings.android.healthrecords.DataBase.RecordEntity;
+import com.websarva.wings.android.healthrecords.DataBase.DaoDetail;
+import com.websarva.wings.android.healthrecords.DataBase.DaoLevelHealth;
+import com.websarva.wings.android.healthrecords.DataBase.DaoTimeCheck;
+import com.websarva.wings.android.healthrecords.DataBase.DataBaseHealth;
+import com.websarva.wings.android.healthrecords.DataBase.DataBaseHealthSingleton;
+import com.websarva.wings.android.healthrecords.DataBase.EntityDetail;
+import com.websarva.wings.android.healthrecords.DataBase.EntityLevelHealth;
+import com.websarva.wings.android.healthrecords.DataBase.EntityTimeCheck;
 
 import java.lang.ref.WeakReference;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class HealthRecordsDetail extends AppCompatActivity {
-    List<RecordEntity> recordEntityList;
-    Intent intent;
-    private AppDataBase adb;
+    ExecutorService executorService;
+    private DataBaseHealth dbh;
     //health_level
     RadioGroup health_level_radio;
     RadioButton rbHealth; //健康状態
-    RadioButton worst;
-    RadioButton bad;
-    RadioButton normal;
-    RadioButton good;
-    RadioButton best;
     //dosage_time_check
     boolean dosage_time_morning;    //服薬時間 朝食
     boolean dosage_time_evening;    //服薬時間 昼食
     boolean dosage_time_afternoon;  //服薬時間 夕食
     //health_records_detail;
-    ExecutorService executorService;
-    RadioGroup inHealth_level;
     String inDetail = "";
 
     @Override
@@ -57,64 +51,59 @@ public class HealthRecordsDetail extends AppCompatActivity {
             return insets;
         });
 
-        adb = AppDataBaseSingleton.getInstance(getApplicationContext());
+        dbh = DataBaseHealthSingleton.getInstance(getApplicationContext());
         executorService = Executors.newSingleThreadExecutor();
 
         //「保存」を押したときの挙動
         findViewById(R.id.check).setOnClickListener(v -> {
-            intent = new Intent();
             health_level_radio = findViewById(R.id.health_radio);
-            health_level_radio.setOnCheckedChangeListener((group, checkedId) -> {
-                rbHealth = findViewById(checkedId);
-                intent.putExtra("health_level", rbHealth.getUrls());         //RadioButtonのIDをセット
-            });
+            health_level_radio.setOnCheckedChangeListener((group, checkedId) ->
+                    rbHealth = findViewById(checkedId));
 
             dosage_time_morning = findViewById(R.id.morning_checkBox).isPressed();
             dosage_time_evening = findViewById(R.id.evening_checkBox).isPressed();
             dosage_time_afternoon = findViewById(R.id.afternoon_checkBox).isPressed();
 
-            intent.putExtra("dosage_time_morning", dosage_time_morning);      //morningのCheckBoxの値をセット
-            intent.putExtra("dosage_time_evening", dosage_time_evening);      //eveningのCheckBoxの値をセット
-            intent.putExtra("dosage_time_afternoon", dosage_time_afternoon);  //afternoonのCheckBoxの値をセット
-
             inDetail = findViewById(R.id.record_detail_text).toString();
-            intent.putExtra("detail", inDetail);                              //detailをセット
 
-            new RecordSave(adb, HealthRecordsDetail.this).execute(intent);
+            new RecordSave(dbh, HealthRecordsDetail.this).execute();
         });
     }
 
     private class RecordSave implements Runnable {
         private final WeakReference<Activity> weakActivity;
-        private final AppDataBase db;
+        private final DataBaseHealth db;
 
-        private RecordSave(AppDataBase db, Activity activity) {
+        private RecordSave(DataBaseHealth db, Activity activity) {
             this.db = db;
             weakActivity = new WeakReference<>(activity);
         }
 
         @Override
         public void run() {
-            RecordDao recordDao = db.recordDao();
-            RecordEntity re_insert = new RecordEntity(rbHealth.getId(), rbHealth.isChecked(), dosage_time_morning, dosage_time_evening, dosage_time_afternoon, inDetail);
-            long id = recordDao.insert(re_insert);
+            DaoLevelHealth dlh = db.daoLevelHealth();
+            DaoTimeCheck dtc = db.daoTimeCheck();
+            DaoDetail dd = db.daoDetail();
+            EntityLevelHealth elh = new EntityLevelHealth(health_level_radio.getCheckedRadioButtonId());
+            EntityTimeCheck etc = new EntityTimeCheck(dosage_time_morning, dosage_time_evening, dosage_time_afternoon);
+            EntityDetail ed = new EntityDetail(inDetail);
 
-            new Handler(Looper.getMainLooper()).post(() -> onPostExecute(id));
+            elh.setId((int) new RecordCalendar().currentDate);
+            etc.setId((int) new RecordCalendar().currentDate);
+            ed.setId((int) new RecordCalendar().currentDate);
+
+            dlh.update(elh);
+            dtc.update(etc);
+            dd.update(ed);
+
+            new Handler(Looper.getMainLooper()).post(() -> onPostExecute());
         }
 
-        void execute(Intent intent) {
-            onPreExecute(intent);
+        void execute() {
             executorService.submit(new RecordSave(db, weakActivity.get()));
         }
 
-        void onPreExecute(Intent intent) {
-            //前処理
-
-        }
-
-        void onPostExecute(long RE_id) {
-            intent.putExtra("setId", RE_id);
-            setResult(RESULT_OK, intent);
+        void onPostExecute() {
             finish();
         }
     }

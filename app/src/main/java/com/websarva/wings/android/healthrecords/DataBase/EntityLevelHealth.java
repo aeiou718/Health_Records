@@ -11,6 +11,7 @@ public class EntityLevelHealth {
 
     public EntityLevelHealth(int level) {
         this.level = level;
+
     }
 
     public int getId() {

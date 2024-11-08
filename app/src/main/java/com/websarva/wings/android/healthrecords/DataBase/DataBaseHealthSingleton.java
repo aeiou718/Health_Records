@@ -4,18 +4,18 @@ import android.content.Context;
 
 import androidx.room.Room;
 
-public class AppDataBaseSingleton {
-    private static AppDataBase instance = null;
+public class DataBaseHealthSingleton {
+    private static DataBaseHealth instance = null;
 
-    private AppDataBaseSingleton() {
+    private DataBaseHealthSingleton() {
     }
 
-    public static AppDataBase getInstance(Context context) {
+    public static DataBaseHealth getInstance(Context context) {
         if (instance != null) {
             return instance;
         }
         instance = Room.databaseBuilder(context,
-                AppDataBase.class, "app_database").build();
+                DataBaseHealth.class, "app_database").build();
         return instance;
     }
 }
