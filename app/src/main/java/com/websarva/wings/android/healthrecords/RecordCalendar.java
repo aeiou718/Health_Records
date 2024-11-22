@@ -25,6 +25,7 @@ import com.websarva.wings.android.healthrecords.DataBase.DaoDetail;
 import com.websarva.wings.android.healthrecords.DataBase.DaoLevelHealth;
 import com.websarva.wings.android.healthrecords.DataBase.DaoTimeCheck;
 import com.websarva.wings.android.healthrecords.DataBase.DataBaseHealth;
+import com.websarva.wings.android.healthrecords.DataBase.DataBaseHealthSingleton;
 import com.websarva.wings.android.healthrecords.DataBase.EntityDetail;
 import com.websarva.wings.android.healthrecords.DataBase.EntityLevelHealth;
 import com.websarva.wings.android.healthrecords.DataBase.EntityTimeCheck;
@@ -39,11 +40,23 @@ public class RecordCalendar extends AppCompatActivity {
     private DataBaseHealth dbh;
     private RecordCalendarViewModel viewModel;
     ExecutorService executorService;
-    List<EntityLevelHealth> entityLevelHealths;
-    List<EntityTimeCheck> entityTimeChecks;
-    List<EntityDetail> entityDetails;
+    DataBaseHealth dataBaseHealth;
+    List<EntityLevelHealth> elh_list;
+    List<EntityTimeCheck> etc_list;
+    List<EntityDetail> ed_list;
+    EntityLevelHealth elh_top;
+    EntityTimeCheck etc_top;
+    EntityDetail ed_top;
+    DaoLevelHealth dlh_top;
+    DaoTimeCheck dtc_top;
+    DaoDetail dd_top;
     Calendar calendar;
-    long currentDate;
+    RadioGroup radioGroup;
+    CheckBox morning;
+    CheckBox evening;
+    CheckBox afternoon;
+    long currentDate;   //カレンダー
+    int dayId;          //日付
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,12 +71,26 @@ public class RecordCalendar extends AppCompatActivity {
         executorService = Executors.newSingleThreadExecutor();
         dbh = Room.databaseBuilder(getApplicationContext(), DataBaseHealth.class, "health_records_db").allowMainThreadQueries().build();
 
+        dataBaseHealth = DataBaseHealthSingleton.getInstance(getApplicationContext());
+        dlh_top = dataBaseHealth.daoLevelHealth();
+        dtc_top = dataBaseHealth.daoTimeCheck();
+        dd_top = dataBaseHealth.daoDetail();
+
         calendar = Calendar.getInstance();
         currentDate = calendar.getTimeInMillis();
         CalendarView healthCalendar = findViewById(R.id.health_calendar);
         healthCalendar.setDate(currentDate);
 
-        RadioGroup radioGroup = findViewById(R.id.health_radio);
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        dayId = year * 10000 + (month + 1) * 100 + day;
+        Log.d("dayId", String.valueOf(dayId));
+
+        viewModel = new ViewModelProvider(this).get(RecordCalendarViewModel.class);
+        new DataRead(dbh, RecordCalendar.this).execute();
+
+        radioGroup = findViewById(R.id.health_radio);
         //　　チェック状態
 //        radioGroup.check(R.id.normal);
         radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
@@ -71,10 +98,10 @@ public class RecordCalendar extends AppCompatActivity {
             new LevelHealthData(dbh, RecordCalendar.this).execute();
         });
 
-        CheckBox morning = findViewById(R.id.morning_checkBox);
-        morning.setChecked(true);
-        CheckBox evening = findViewById(R.id.evening_checkBox);
-        CheckBox afternoon = findViewById(R.id.afternoon_checkBox);
+        morning = findViewById(R.id.morning_checkBox);
+        evening = findViewById(R.id.evening_checkBox);
+        afternoon = findViewById(R.id.afternoon_checkBox);
+
         morning.setOnCheckedChangeListener((buttonView, isChecked) -> {
             Log.d("morning", String.valueOf(morning.isChecked()));
             new CheckBoxData(dbh, RecordCalendar.this).execute();
@@ -88,36 +115,60 @@ public class RecordCalendar extends AppCompatActivity {
             new CheckBoxData(dbh, RecordCalendar.this).execute();
         });
 
-        healthCalendar.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
-            @Override
-            public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
-                Log.d("Selected Date", year + "/" + (month + 1) + "/" + dayOfMonth);
-//                Calendar calendar = Calendar.getInstance();
-                calendar.set(year, month, dayOfMonth);
-                long selectedDate = year * 10000L + (month + 1) * 100L + dayOfMonth;
-                Log.d("Selected Date", String.valueOf(selectedDate));
-                currentDate = selectedDate;
-
-            }
-        });
-
-        viewModel = new ViewModelProvider(this).get(RecordCalendarViewModel.class);
         final Observer<EntityLevelHealth> lhObserver = entityLevelHealth -> {
             if (entityLevelHealth != null) {
-                entityLevelHealth.setId((int) currentDate);
+                entityLevelHealth.setId(dayId);
                 radioGroup.check(entityLevelHealth.getLevel());
             }
         };
         final Observer<EntityTimeCheck> tcObserver = entityTimeCheck -> {
             if (entityTimeCheck != null) {
-                entityTimeCheck.setId((int) currentDate);
+                Log.d("EntityTimeCheck", String.valueOf(entityTimeCheck.getId()));
+                entityTimeCheck.setId(dayId);
+                Log.d("EntityTimeCheck_morning", String.valueOf(entityTimeCheck.isMorning()));
                 morning.setChecked(entityTimeCheck.isMorning());
                 evening.setChecked(entityTimeCheck.isEvening());
                 afternoon.setChecked(entityTimeCheck.isAfternoon());
             }
         };
-        viewModel.getElh().observe(this, lhObserver);
-        viewModel.getEtc().observe(this, tcObserver);
+
+        //カレンダー変更
+        healthCalendar.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
+            @Override
+            public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
+                dayId = year * 10000 + (month + 1) * 100 + dayOfMonth;
+
+                EntityLevelHealth elh = viewModel.getEntityLevelHealth(dayId);
+                EntityTimeCheck etc = viewModel.getEntityTimeCheck(dayId, etc_top);
+
+                if (elh != null) {
+                    Log.d("elh", "elh.start");
+                    radioGroup.check(elh.getLevel());
+                    new LevelHealthData(dbh, RecordCalendar.this).execute();
+                }
+
+                if (etc != null) {
+                    Log.d("etc", "etc.start");
+                    morning.setChecked(etc.isMorning());
+                    evening.setChecked(etc.isEvening());
+                    afternoon.setChecked(etc.isAfternoon());
+                    new CheckBoxData(dbh, RecordCalendar.this).execute();
+                }
+
+                Log.d("Selected Date", year + "/" + (month + 1) + "/" + dayOfMonth);
+//                Calendar calendar = Calendar.getInstance();
+                calendar.set(year, month, dayOfMonth);
+                dayId = year * 10000 + (month + 1) * 100 + dayOfMonth;
+                Log.d("Selected Date dayId", String.valueOf(dayId));
+
+                viewModel.getElh_live(dayId).observe(RecordCalendar.this, lhObserver);
+                viewModel.getEtc_live(dayId).observe(RecordCalendar.this, tcObserver);
+            }
+        });
+
+
+        viewModel.getElh_live(dayId).observe(RecordCalendar.this, lhObserver);
+        viewModel.getEtc_live(dayId).observe(RecordCalendar.this, tcObserver);
     }
 
     //RadioGroupのデータベース
@@ -133,27 +184,24 @@ public class RecordCalendar extends AppCompatActivity {
 
         @Override
         public void run() {
+//            RadioGroup radioGroup = findViewById(R.id.health_radio);
+//            healthLevel = findViewById(radioGroup.getCheckedRadioButtonId());
+
             DaoLevelHealth daoLevelHealth = db.daoLevelHealth();
-            EntityLevelHealth entityLevelHealth = new EntityLevelHealth(healthLevel.getId());
-            entityLevelHealth.setId((int) currentDate);
-            daoLevelHealth.update(entityLevelHealth);
+            EntityLevelHealth entityLevelHealth = dlh_top.getElhById(dayId);
+//            daoLevelHealth.getAll();
+            entityLevelHealth.setLevel(radioGroup.getCheckedRadioButtonId());
+            daoLevelHealth.insert(entityLevelHealth);
 
             new Handler(Looper.getMainLooper()).post(() -> onPostExecute(entityLevelHealth));
         }
 
-        void onPreExecute() {
-            RadioGroup radioGroup = findViewById(R.id.health_radio);
-            healthLevel = findViewById(radioGroup.getCheckedRadioButtonId());
-        }
-
         void execute() {
-            onPreExecute();
             executorService.submit(new LevelHealthData(db, weakActivity.get()));
-
         }
 
         void onPostExecute(EntityLevelHealth elh) {
-            viewModel.getElh().setValue(elh);
+            viewModel.getElh_live(dayId).setValue(elh);
         }
     }
 
@@ -172,70 +220,63 @@ public class RecordCalendar extends AppCompatActivity {
 
         @Override
         public void run() {
-            DaoTimeCheck daoTimeCheck = db.daoTimeCheck();
-            EntityTimeCheck entityTimeCheck = new EntityTimeCheck(morning, evening, afternoon);
-            entityTimeCheck.setId((int) currentDate);
-            daoTimeCheck.update(entityTimeCheck);
-
-            new Handler(Looper.getMainLooper()).post(() -> onPostExecute(entityTimeCheck));
-
-        }
-
-        void onPreExecute() {
             CheckBox boxMorning = findViewById(R.id.morning_checkBox);
             morning = boxMorning.isChecked();
             CheckBox boxEvening = findViewById(R.id.evening_checkBox);
             evening = boxEvening.isChecked();
             CheckBox boxAfternoon = findViewById(R.id.afternoon_checkBox);
             afternoon = boxAfternoon.isChecked();
+
+            DaoTimeCheck daoTimeCheck = db.daoTimeCheck();
+            EntityTimeCheck entityTimeCheck = new EntityTimeCheck(morning, evening, afternoon);
+            daoTimeCheck.getAll();
+            entityTimeCheck.setId(dayId);
+            entityTimeCheck.setMorning(morning);
+            entityTimeCheck.setEvening(evening);
+            entityTimeCheck.setAfternoon(afternoon);
+            daoTimeCheck.insert(entityTimeCheck);
+
+            new Handler(Looper.getMainLooper()).post(() -> onPostExecute(entityTimeCheck));
         }
 
         void execute() {
-            onPreExecute();
             executorService.submit(new CheckBoxData(db, weakActivity.get()));
-
         }
 
         void onPostExecute(EntityTimeCheck etc) {
-            viewModel.getEtc().setValue(etc);
+            viewModel.getEtc_live(dayId).setValue(etc);
         }
     }
 
-    class DataSave implements Runnable {
+    class DataRead implements Runnable {
         private final WeakReference<Activity> weakActivity;
         private final DataBaseHealth db;
 
-        public DataSave(DataBaseHealth db, Activity activity) {
+        public DataRead(DataBaseHealth db, Activity activity) {
             this.db = db;
             weakActivity = new WeakReference<>(activity);
         }
 
         @Override
         public void run() {
-            DaoLevelHealth daoLevelHealth = db.daoLevelHealth();
-            DaoTimeCheck daoTimeCheck = db.daoTimeCheck();
-            DaoDetail daoDetail = db.daoDetail();
-//            RecordEntity recordEntity = new RecordEntity();
-//            recordDao.update(recordEntity);
-            entityLevelHealths = daoLevelHealth.getAll();
-            entityTimeChecks = daoTimeCheck.getAll();
-            entityDetails = daoDetail.getAll();
+            if (dlh_top != null || dtc_top != null || dd_top != null) {
+                elh_list = dlh_top.getAll();
+                etc_list = dtc_top.getAll();
+                ed_list = dd_top.getAll();
+            }
+            elh_top = dlh_top.getElhById(dayId);
+            etc_top = new EntityTimeCheck(morning.isChecked(), evening.isChecked(), afternoon.isChecked());
+            ed_top = new EntityDetail("");
 
-            new Handler(Looper.getMainLooper()).post(() -> onPostExecute(entityLevelHealths, entityTimeChecks, entityDetails));
-        }
-
-        void onPreExecute() {
-
+            new Handler(Looper.getMainLooper()).post(() -> onPostExecute());
         }
 
         void execute() {
-            onPreExecute();
-            executorService.submit(new DataSave(db, weakActivity.get()));
+            executorService.submit(new DataRead(db, weakActivity.get()));
         }
 
-        void onPostExecute(List<EntityLevelHealth> elh, List<EntityTimeCheck> etc, List<EntityDetail> ed) {
+        void onPostExecute() {
 
         }
-
     }
 }

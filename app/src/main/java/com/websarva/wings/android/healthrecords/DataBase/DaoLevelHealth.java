@@ -1,8 +1,9 @@
 package com.websarva.wings.android.healthrecords.DataBase;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
-import androidx.room.Delete;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
@@ -13,12 +14,15 @@ public interface DaoLevelHealth {
     @Query("SELECT * FROM health_level")
     List<EntityLevelHealth> getAll();
 
-    @Update
-    void update(EntityLevelHealth levelHealth);
+    @Query("SELECT * FROM health_level WHERE id = :id")
+    EntityLevelHealth getElhById(int id);
 
-    @Insert
+    @Query("SELECT * FROM health_level WHERE id = :id")
+    LiveData<List<EntityLevelHealth>> getElhLd(int id);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     long insert(EntityLevelHealth levelHealth);
 
-    @Delete
-    void delete(EntityLevelHealth levelHealth);
+    @Update
+    void update(EntityLevelHealth levelHealth);
 }

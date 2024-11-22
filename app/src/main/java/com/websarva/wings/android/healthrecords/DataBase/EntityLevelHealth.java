@@ -9,9 +9,8 @@ public class EntityLevelHealth {
     private int id;
     private int level;  //RadioGroupのId値を保存
 
-    public EntityLevelHealth(int level) {
-        this.level = level;
-
+    public EntityLevelHealth(int id) {
+        this.id = id;
     }
 
     public int getId() {

@@ -1,8 +1,8 @@
 package com.websarva.wings.android.healthrecords.DataBase;
 
 import androidx.room.Dao;
-import androidx.room.Delete;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
@@ -13,12 +13,9 @@ public interface DaoDetail {
     @Query("SELECT * FROM entity_detail")
     List<EntityDetail> getAll();
 
-    @Update
-    void update(EntityDetail entityDetail);
-
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(EntityDetail entityDetail);
 
-    @Delete
-    void delete(EntityDetail entityDetail);
+    @Update
+    void update(EntityDetail entityDetail);
 }

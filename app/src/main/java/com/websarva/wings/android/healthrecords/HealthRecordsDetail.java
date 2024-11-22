@@ -88,12 +88,12 @@ public class HealthRecordsDetail extends AppCompatActivity {
             EntityTimeCheck etc = new EntityTimeCheck(dosage_time_morning, dosage_time_evening, dosage_time_afternoon);
             EntityDetail ed = new EntityDetail(inDetail);
 
-            elh.setId((int) new RecordCalendar().currentDate);
-            etc.setId((int) new RecordCalendar().currentDate);
-            ed.setId((int) new RecordCalendar().currentDate);
+            elh.setId(new RecordCalendar().dayId);
+            etc.setId(new RecordCalendar().dayId);
+            ed.setId(new RecordCalendar().dayId);
 
             dlh.update(elh);
-            dtc.update(etc);
+            dtc.insert(etc);
             dd.update(ed);
 
             new Handler(Looper.getMainLooper()).post(() -> onPostExecute());
