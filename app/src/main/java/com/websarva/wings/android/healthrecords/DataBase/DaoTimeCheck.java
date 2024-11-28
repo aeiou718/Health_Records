@@ -1,6 +1,5 @@
 package com.websarva.wings.android.healthrecords.DataBase;
 
-import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
@@ -15,7 +14,7 @@ public interface DaoTimeCheck {
     List<EntityTimeCheck> getAll();
 
     @Query("SELECT * FROM time_check WHERE id = :id")
-    LiveData<EntityTimeCheck> getEntityTimeCheckById(int id);
+    EntityTimeCheck getEtcById(int id);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(EntityTimeCheck entityTimeCheck);

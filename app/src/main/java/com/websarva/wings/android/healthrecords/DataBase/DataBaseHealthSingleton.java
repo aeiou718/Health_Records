@@ -7,9 +7,6 @@ import androidx.room.Room;
 public class DataBaseHealthSingleton {
     private static DataBaseHealth instance = null;
 
-    private DataBaseHealthSingleton() {
-    }
-
     public static DataBaseHealth getInstance(Context context) {
         if (instance != null) {
             return instance;

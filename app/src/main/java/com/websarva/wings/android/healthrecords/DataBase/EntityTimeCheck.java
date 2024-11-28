@@ -7,9 +7,9 @@ import androidx.room.PrimaryKey;
 public class EntityTimeCheck {
     @PrimaryKey(autoGenerate = true)
     private int id;
-    private boolean morning;
-    private boolean evening;
-    private boolean afternoon;
+    private final boolean morning;
+    private final boolean evening;
+    private final boolean afternoon;
 
     public EntityTimeCheck(boolean morning, boolean evening, boolean afternoon) {
         this.morning = morning;
@@ -21,24 +21,12 @@ public class EntityTimeCheck {
         return morning;
     }
 
-    public void setMorning(boolean morning) {
-        this.morning = morning;
-    }
-
     public boolean isEvening() {
         return evening;
     }
 
-    public void setEvening(boolean evening) {
-        this.evening = evening;
-    }
-
     public boolean isAfternoon() {
         return afternoon;
-    }
-
-    public void setAfternoon(boolean afternoon) {
-        this.afternoon = afternoon;
     }
 
     public int getId() {

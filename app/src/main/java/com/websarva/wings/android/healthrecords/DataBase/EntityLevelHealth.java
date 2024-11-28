@@ -7,10 +7,10 @@ import androidx.room.PrimaryKey;
 public class EntityLevelHealth {
     @PrimaryKey(autoGenerate = true)
     private int id;
-    private int level;  //RadioGroupのId値を保存
+    private final int level;  //RadioGroupのId値を保存
 
-    public EntityLevelHealth(int id) {
-        this.id = id;
+    public EntityLevelHealth(int level) {
+        this.level = level;
     }
 
     public int getId() {
@@ -24,9 +24,4 @@ public class EntityLevelHealth {
     public int getLevel() {
         return level;
     }
-
-    public void setLevel(int level) {
-        this.level = level;
-    }
-
 }
