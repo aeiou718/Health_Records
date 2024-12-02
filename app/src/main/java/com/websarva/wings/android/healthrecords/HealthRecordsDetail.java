@@ -1,9 +1,10 @@
 package com.websarva.wings.android.healthrecords;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
@@ -23,22 +24,25 @@ import com.websarva.wings.android.healthrecords.DataBase.EntityDetail;
 import com.websarva.wings.android.healthrecords.DataBase.EntityLevelHealth;
 import com.websarva.wings.android.healthrecords.DataBase.EntityTimeCheck;
 
-import java.lang.ref.WeakReference;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class HealthRecordsDetail extends AppCompatActivity {
     ExecutorService executorService;
     private DataBaseHealth dbh;
+    int dayId;
     //health_level
     RadioGroup health_level_radio;
     RadioButton rbHealth; //健康状態
     //dosage_time_check
+    CheckBox morning;
+    CheckBox evening;
+    CheckBox afternoon;
     boolean dosage_time_morning;    //服薬時間 朝食
     boolean dosage_time_evening;    //服薬時間 昼食
     boolean dosage_time_afternoon;  //服薬時間 夕食
     //health_records_detail;
-    String inDetail = "";
+    EditText inDetail;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -53,30 +57,75 @@ public class HealthRecordsDetail extends AppCompatActivity {
 
         dbh = DataBaseHealthSingleton.getInstance(getApplicationContext());
         executorService = Executors.newSingleThreadExecutor();
+        dayId = getIntent().getIntExtra("dayId", 0);
+
+        health_level_radio = findViewById(R.id.health_radio);
+
+        morning = findViewById(R.id.morning_checkBox);
+        evening = findViewById(R.id.evening_checkBox);
+        afternoon = findViewById(R.id.afternoon_checkBox);
+
+        inDetail = findViewById(R.id.record_detail_text);
 
         //「保存」を押したときの挙動
         findViewById(R.id.check).setOnClickListener(v -> {
-            health_level_radio = findViewById(R.id.health_radio);
             health_level_radio.setOnCheckedChangeListener((group, checkedId) ->
                     rbHealth = findViewById(checkedId));
 
-            dosage_time_morning = findViewById(R.id.morning_checkBox).isPressed();
-            dosage_time_evening = findViewById(R.id.evening_checkBox).isPressed();
-            dosage_time_afternoon = findViewById(R.id.afternoon_checkBox).isPressed();
+            dosage_time_morning = morning.isChecked();
+            dosage_time_evening = evening.isChecked();
+            dosage_time_afternoon = afternoon.isChecked();
 
-            inDetail = findViewById(R.id.record_detail_text).toString();
-
-            new RecordSave(dbh, HealthRecordsDetail.this).execute();
+            new RecordSave(dbh).execute();
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        dataRead();
+    }
+
+    void dataRead() {
+        executorService.submit(new DataRead());
+    }
+
+    private class DataRead implements Runnable {
+        private EntityLevelHealth elh_top;
+        private EntityTimeCheck etc_top;
+        private EntityDetail ed_top;
+
+        @Override
+        public void run() {
+            DaoLevelHealth daoLevelHealth = dbh.daoLevelHealth();
+            DaoTimeCheck daoTimeCheck = dbh.daoTimeCheck();
+            DaoDetail daoDetail = dbh.daoDetail();
+
+            elh_top = daoLevelHealth.getElhById(dayId);
+            etc_top = daoTimeCheck.getEtcById(dayId);
+            ed_top = daoDetail.getEdById(dayId);
+
+            new Handler(Looper.getMainLooper()).post(this::onPostExecute);
+        }
+
+        void onPostExecute() {
+            health_level_radio.check(elh_top.getLevel());
+            morning.setChecked(etc_top.isMorning());
+            evening.setChecked(etc_top.isEvening());
+            afternoon.setChecked(etc_top.isAfternoon());
+            if (ed_top == null) {
+                inDetail.setText("");
+            } else {
+                inDetail.setText(ed_top.getDetail());
+            }
+        }
+    }
+
     private class RecordSave implements Runnable {
-        private final WeakReference<Activity> weakActivity;
         private final DataBaseHealth db;
 
-        private RecordSave(DataBaseHealth db, Activity activity) {
+        private RecordSave(DataBaseHealth db) {
             this.db = db;
-            weakActivity = new WeakReference<>(activity);
         }
 
         @Override
@@ -86,21 +135,21 @@ public class HealthRecordsDetail extends AppCompatActivity {
             DaoDetail dd = db.daoDetail();
             EntityLevelHealth elh = new EntityLevelHealth(health_level_radio.getCheckedRadioButtonId());
             EntityTimeCheck etc = new EntityTimeCheck(dosage_time_morning, dosage_time_evening, dosage_time_afternoon);
-            EntityDetail ed = new EntityDetail(inDetail);
+            EntityDetail ed = new EntityDetail(inDetail.getText().toString());
 
-            elh.setId(new RecordCalendar().dayId);
-            etc.setId(new RecordCalendar().dayId);
-            ed.setId(new RecordCalendar().dayId);
+            elh.setId(dayId);
+            etc.setId(dayId);
+            ed.setId(dayId);
 
-            dlh.update(elh);
+            dlh.insert(elh);
             dtc.insert(etc);
-            dd.update(ed);
+            dd.insert(ed);
 
-            new Handler(Looper.getMainLooper()).post(() -> onPostExecute());
+            new Handler(Looper.getMainLooper()).post(this::onPostExecute);
         }
 
         void execute() {
-            executorService.submit(new RecordSave(db, weakActivity.get()));
+            executorService.submit(new RecordSave(db));
         }
 
         void onPostExecute() {

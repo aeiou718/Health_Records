@@ -1,8 +1,10 @@
 package com.websarva.wings.android.healthrecords;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.CheckBox;
 import android.widget.RadioGroup;
@@ -100,6 +102,13 @@ public class RecordCalendar extends AppCompatActivity {
         };
         viewModel.getElh_live().observe(RecordCalendar.this, lhObserver);
         viewModel.getEtc_live().observe(RecordCalendar.this, tcObserver);
+
+        Button inDetail = findViewById(R.id.inDetail);
+        inDetail.setOnClickListener(v -> {
+            Intent intent = new Intent(RecordCalendar.this, HealthRecordsDetail.class);
+            intent.putExtra("dayId", dayId);
+            startActivity(intent);
+        });
 
         //カレンダー変更
         healthCalendar.setOnDateChangeListener((view, year1, month1, dayOfMonth) -> {

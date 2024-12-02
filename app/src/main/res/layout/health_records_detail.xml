@@ -16,31 +16,7 @@
 
         <include layout="@layout/parts_health_level" />
 
-        <!--        <androidx.constraintlayout.widget.ConstraintLayout-->
-        <!--            android:id="@+id/record_health_level"-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="0dp"-->
-        <!--            android:layout_weight="1"-->
-        <!--            app:layout_constraintBottom_toBottomOf="parent"-->
-        <!--            app:layout_constraintEnd_toEndOf="parent"-->
-        <!--            app:layout_constraintStart_toStartOf="parent"-->
-        <!--            app:layout_constraintTop_toTopOf="parent">-->
-
-        <!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
-
         <include layout="@layout/parts_dosage_time_check" />
-
-        <!--        <androidx.constraintlayout.widget.ConstraintLayout-->
-        <!--            android:id="@+id/record_dosage"-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="0dp"-->
-        <!--            android:layout_weight="1"-->
-        <!--            app:layout_constraintBottom_toTopOf="parent"-->
-        <!--            app:layout_constraintEnd_toEndOf="parent"-->
-        <!--            app:layout_constraintStart_toStartOf="parent"-->
-        <!--            app:layout_constraintTop_toTopOf="parent">-->
-
-        <!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
 
     </LinearLayout>
 
@@ -64,18 +40,18 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
+            app:layout_constraintTop_toTopOf="parent">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/record_detail_text"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:gravity="start"
                 android:hint="@string/records_default"
                 android:inputType="text|textMultiLine"
-                android:gravity="start"
                 android:textSize="24sp" />
 
         </com.google.android.material.textfield.TextInputLayout>
