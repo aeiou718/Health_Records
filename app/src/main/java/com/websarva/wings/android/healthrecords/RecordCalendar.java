@@ -4,14 +4,21 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.ContextMenu;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.CheckBox;
 import android.widget.RadioGroup;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -52,14 +59,17 @@ public class RecordCalendar extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        executorService = Executors.newSingleThreadExecutor();
 
+        executorService = Executors.newSingleThreadExecutor();
         dbh = DataBaseHealthSingleton.getInstance(getApplicationContext());
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         calendar = Calendar.getInstance();
         currentDate = calendar.getTimeInMillis();
         CalendarView healthCalendar = findViewById(R.id.health_calendar);
-        healthCalendar.setDate(currentDate);
 
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH);
@@ -122,11 +132,37 @@ public class RecordCalendar extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        CalendarView healthCalendar = findViewById(R.id.health_calendar);
+        healthCalendar.setDate(currentDate);
         dataRead();
     }
 
     void dataRead() {
         executorService.submit(new DataRead());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.calendar_list, menu);
+        return true;
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.calendar_list, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int itemId = item.getItemId();
+        if (itemId == R.id.menu_settings) {
+            Intent intent = new Intent(RecordCalendar.this, RecordCalendarList.class);
+            startActivity(intent);
+        }
+        return true;
     }
 
     //RadioGroupのデータベース

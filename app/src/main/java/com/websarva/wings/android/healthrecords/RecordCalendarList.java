@@ -1,148 +1,162 @@
 package com.websarva.wings.android.healthrecords;
 
-import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.LayoutInflater;
+import android.util.Log;
+import android.view.ContextMenu;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.CheckBox;
-import android.widget.ListView;
-import android.widget.RadioGroup;
-import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.room.Room;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import com.websarva.wings.android.healthrecords.DataBase.AppDataBase;
-import com.websarva.wings.android.healthrecords.DataBase.RecordDao;
-import com.websarva.wings.android.healthrecords.DataBase.RecordEntity;
+import com.websarva.wings.android.healthrecords.DataBase.DaoLevelHealth;
+import com.websarva.wings.android.healthrecords.DataBase.DaoTimeCheck;
+import com.websarva.wings.android.healthrecords.DataBase.DataBaseHealth;
+import com.websarva.wings.android.healthrecords.DataBase.DataBaseHealthSingleton;
+import com.websarva.wings.android.healthrecords.DataBase.EntityLevelHealth;
+import com.websarva.wings.android.healthrecords.DataBase.EntityTimeCheck;
 
-import java.lang.ref.WeakReference;
+import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class RecordCalendarList extends AppCompatActivity {
-    private AppDataBase adb;
-    private ListView recordList;
+    private DataBaseHealth dbh;
     ExecutorService executorService;
-    List<RecordEntity> recordEntityList;
+    Calendar calendar;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.record_calendar_list);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.record_calendar_list), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        executorService = Executors.newSingleThreadExecutor();
 
+        executorService = Executors.newSingleThreadExecutor();
+        dbh = DataBaseHealthSingleton.getInstance(getApplicationContext());
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        calendar = Calendar.getInstance();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        adb = Room.databaseBuilder(getApplicationContext(),
-                AppDataBase.class, "health_records_db").allowMainThreadQueries().build();
-        new DataRead(adb, RecordCalendarList.this).execute();
-        // recordEntityListがnullにならないようにする
-        recordEntityList = adb.recordDao().getAll(); // 修正箇所
-        updateList();
+        dataRead();
     }
 
+    void dataRead() {
+        executorService.submit(new DataRead());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.calendar_list, menu);
+        return true;
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.calendar_list, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int itemId = item.getItemId();
+        if (itemId == R.id.menu_settings) {
+            finish();
+        }
+        return true;
+    }
 
     class DataRead implements Runnable {
-        private final WeakReference<Activity> weakActivity;
-        private final AppDataBase db;
+        private List<EntityLevelHealth> levelHealthList;
+        private List<EntityTimeCheck> timeCheckList;
+        private final int currentDate;   //カレンダー
+        private final int startDate;
 
-        public DataRead(AppDataBase db, Activity activity) {
-            this.db = db;
-            weakActivity = new WeakReference<>(activity);
+        DataRead() {
+            // 日曜日の値を入手
+            int dayObSat = calendar.get(Calendar.DAY_OF_WEEK);
+            while (dayObSat != Calendar.SATURDAY) {
+                calendar.add(Calendar.DAY_OF_MONTH, 1);
+                dayObSat = calendar.get(Calendar.DAY_OF_WEEK);
+            }
+
+            int year = calendar.get(Calendar.YEAR);
+            int month = calendar.get(Calendar.MONTH);
+            int day = calendar.get(Calendar.DAY_OF_MONTH);
+            currentDate = year * 10000 + (month + 1) * 100 + day;
+
+            int dayObSun = calendar.get(Calendar.DAY_OF_WEEK);
+            while (dayObSun != Calendar.SUNDAY) {
+                calendar.add(Calendar.DAY_OF_MONTH, -1);
+                dayObSun = calendar.get(Calendar.DAY_OF_WEEK);
+            }
+
+            int yearW = calendar.get(Calendar.YEAR);
+            int monthW = calendar.get(Calendar.MONTH);
+            int dayW = calendar.get(Calendar.DAY_OF_MONTH);
+            startDate = yearW * 10000 + (monthW + 1) * 100 + dayW;
+
+            Log.d("日付current", String.valueOf(currentDate));
+            Log.d("日付start", String.valueOf(startDate));
+
+
         }
 
         @Override
         public void run() {
-            RecordDao recordDao = db.recordDao();
-            recordEntityList = recordDao.getAll();
+            DaoLevelHealth daoLevelHealth = dbh.daoLevelHealth();
+            DaoTimeCheck daoTimeCheck = dbh.daoTimeCheck();
 
-            new Handler(Looper.getMainLooper()).post(() -> onPostExecute(recordEntityList));
-        }
-
-        void execute() {
-            executorService.submit(new DataRead(db, weakActivity.get()));
-        }
-
-        void onPostExecute(List<RecordEntity> recordEntityList) {
-            updateList();
-            recordEntityList.sort((o1, o2) -> o1.getId() - o2.getId());
-        }
-    }
-
-    void updateList() {
-        RecordAdapter adapter = new RecordAdapter(RecordCalendarList.this, recordEntityList);
-        recordList = findViewById(R.id.health_records_list);
-        recordList.setAdapter(adapter);
-    }
-
-    private class RecordAdapter extends BaseAdapter {
-        private final List<RecordEntity> recordList;
-        private final LayoutInflater inflater;
-
-        public RecordAdapter(Context context, List<RecordEntity> recordList) {
-            this.recordList = recordList;
-            this.inflater = LayoutInflater.from(context);
-        }
-
-        @Override
-        public int getCount() {
-            return recordList.size();
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return recordList.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return recordList.get(position).getId();
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            RecordEntity item = recordList.get(position);
-
-            if (convertView == null) {
-                convertView = inflater.inflate(R.layout.parts_health_records_day, parent, false);
+            for (int i = startDate; i <= currentDate; i++) {
+                EntityLevelHealth elh_top = daoLevelHealth.getElhById(i);
+                EntityTimeCheck etc_top = daoTimeCheck.getEtcById(i);
+                if (elh_top == null) {
+                    elh_top = new EntityLevelHealth(-1);
+                    elh_top.setId(i);
+                    daoLevelHealth.insert(elh_top);
+                }
+                if (etc_top == null) {
+                    etc_top = new EntityTimeCheck(false, false, false);
+                    etc_top.setId(i);
+                    daoTimeCheck.insert(etc_top);
+                }
             }
+            // ラジオボタン
+            levelHealthList = daoLevelHealth.getElhForWeek(startDate, currentDate);
+            // チェックボックス
+            timeCheckList = daoTimeCheck.getTimeCheckForWeek(startDate, currentDate);
 
-            // radio button button button
-            RadioGroup radioGroup = convertView.findViewById(R.id.health_radio);
-            radioGroup.setId(item.getHealth_id());
-            CheckBox morning = convertView.findViewById(R.id.morning);
-            morning.setChecked(item.isMorning());
-            CheckBox evening = convertView.findViewById(R.id.evening);
-            evening.setChecked(item.isEvening());
-            CheckBox afternoon = convertView.findViewById(R.id.afternoon);
-            afternoon.setChecked(item.isAfternoon());
+            new Handler(Looper.getMainLooper()).post(this::onPostExecute);
+        }
 
-            // day text
-            // ここにrecord_dayに表示する値を入れる
-            TextView dayText = convertView.findViewById(R.id.record_day);
-            dayText.setText("00");
-
-            return convertView;
+        void onPostExecute() {
+            RecyclerView recyclerView = findViewById(R.id.health_records_list);
+            recyclerView.setLayoutManager(new LinearLayoutManager(RecordCalendarList.this));
+            ViewAdapter adapter = new ViewAdapter(getApplicationContext(), levelHealthList, timeCheckList);
+            recyclerView.setAdapter(adapter);
         }
     }
 }

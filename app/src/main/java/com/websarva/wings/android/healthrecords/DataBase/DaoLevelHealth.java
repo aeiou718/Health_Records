@@ -12,6 +12,9 @@ public interface DaoLevelHealth {
     @Query("SELECT * FROM health_level")
     List<EntityLevelHealth> getAll();
 
+    @Query("SELECT * FROM health_level WHERE id BETWEEN :startDate AND :entDate")
+    List<EntityLevelHealth> getElhForWeek(long startDate, long entDate);
+
     @Query("SELECT * FROM health_level WHERE id = :id")
     EntityLevelHealth getElhById(int id);
 

@@ -16,4 +16,5 @@
     <color name="noon_color">#40C4FF</color>
     <color name="night_color">#3949AB</color>
     <color name="transparent">#00000000</color>
+    <color name="toolbar">#FFD180</color>
 </resources>

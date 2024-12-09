@@ -12,9 +12,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.HealthRecords">
         <activity
-            android:name=".HealthRecordsDetail"
-            android:exported="false" />
-        <activity
             android:name=".RecordCalendar"
             android:exported="true"
             android:screenOrientation="portrait"
@@ -24,6 +21,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".RecordCalendarList"
+            android:exported="false" />
+        <activity
+            android:name=".HealthRecordsDetail"
+            android:exported="false" />
     </application>
 
 </manifest>

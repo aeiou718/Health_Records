@@ -12,6 +12,10 @@ public interface DaoTimeCheck {
     @Query("SELECT * FROM time_check")
     List<EntityTimeCheck> getAll();
 
+    @Query("SELECT * FROM time_check WHERE id BETWEEN :startDate AND :endDate")
+    List<EntityTimeCheck> getTimeCheckForWeek(long startDate, long endDate);
+
+
     @Query("SELECT * FROM time_check WHERE id = :id")
     EntityTimeCheck getEtcById(int id);
 
