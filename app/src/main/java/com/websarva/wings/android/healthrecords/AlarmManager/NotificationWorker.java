@@ -14,7 +14,7 @@ import com.websarva.wings.android.healthrecords.R;
 public class NotificationWorker extends Worker {
 
     private static final String CHANNEL_ID = "default_channel_id";
-    private static final String CHANNEL_NAME = "デフォルト通知チャンネル";
+    private static final String CHANNEL_NAME = "薬の服用通知";
     public static final String TITLE_KEY = "notification_title";
     public static final String MESSAGE_KEY = "notification_message";
     public static final int NOTIFICATION_ID = 123;

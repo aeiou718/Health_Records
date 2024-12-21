@@ -9,11 +9,5 @@
     <string name="record_detail">詳細</string>
     <string name="save">保存</string>
 
-    <string name="morning">朝</string>
-    <string name="evening">昼</string>
-    <string name="afternoon">夕方</string>
-
-    <string name="medication">お薬の時間です</string>
-
     <string name="default_day">曜日</string>
 </resources>
