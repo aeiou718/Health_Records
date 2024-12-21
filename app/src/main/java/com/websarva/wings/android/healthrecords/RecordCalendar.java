@@ -25,6 +25,8 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.websarva.wings.android.healthrecords.AlarmManager.NotificationList;
+import com.websarva.wings.android.healthrecords.AlarmManager.NotificationPermissionUtil;
 import com.websarva.wings.android.healthrecords.DataBase.DaoLevelHealth;
 import com.websarva.wings.android.healthrecords.DataBase.DaoTimeCheck;
 import com.websarva.wings.android.healthrecords.DataBase.DataBaseHealth;
@@ -65,7 +67,6 @@ public class RecordCalendar extends AppCompatActivity {
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         calendar = Calendar.getInstance();
         currentDate = calendar.getTimeInMillis();
@@ -127,6 +128,9 @@ public class RecordCalendar extends AppCompatActivity {
             executorService.submit(new DataRead());
             calendar.set(year1, month1, dayOfMonth);
         });
+
+        // 通知確認
+        NotificationPermissionUtil.checkAndShowNotificationDialog(this);
     }
 
     @Override
@@ -144,7 +148,7 @@ public class RecordCalendar extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.calendar_list, menu);
+        inflater.inflate(R.menu.calendar_main, menu);
         return true;
     }
 
@@ -152,15 +156,19 @@ public class RecordCalendar extends AppCompatActivity {
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.calendar_list, menu);
+        inflater.inflate(R.menu.calendar_main, menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
-        if (itemId == R.id.menu_settings) {
-            Intent intent = new Intent(RecordCalendar.this, RecordCalendarList.class);
-            startActivity(intent);
+        if (itemId == R.id.menu_calendar) {
+            Intent intentList = new Intent(RecordCalendar.this, RecordCalendarList.class);
+            startActivity(intentList);
+        }
+        if (itemId == R.id.menu_alarm) {
+            Intent intentAlarm = new Intent(RecordCalendar.this, NotificationList.class);
+            startActivity(intentAlarm);
         }
         return true;
     }

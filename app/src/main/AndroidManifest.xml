@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -26,6 +28,9 @@
             android:exported="false" />
         <activity
             android:name=".HealthRecordsDetail"
+            android:exported="false" />
+        <activity
+            android:name=".AlarmManager.NotificationList"
             android:exported="false" />
     </application>
 

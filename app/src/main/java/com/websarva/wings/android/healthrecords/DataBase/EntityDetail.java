@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey;
 public class EntityDetail {
     @PrimaryKey(autoGenerate = true)
     private int id;
-    private String detail;
+    private final String detail;
 
     public EntityDetail(String detail) {
         this.detail = detail;
@@ -23,9 +23,5 @@ public class EntityDetail {
 
     public String getDetail() {
         return detail;
-    }
-
-    public void setDetail(String detail) {
-        this.detail = detail;
     }
 }
