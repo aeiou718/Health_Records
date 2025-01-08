@@ -48,25 +48,6 @@ public class NotificationScheduler {
         return (targetHour - currentHour) * 60 * 60 * 1000 + (targetMinute - currentMinute) * 60 * 1000;
     }
 
-//    private static OneTimeWorkRequest createOneTimeWorkRequest(Context context, String title, int delay, int id) {
-//        Data inputData = new Data.Builder()
-//                .putString(NotificationWorker.TITLE_KEY, title)
-//                .putString(NotificationWorker.MESSAGE_KEY, "お薬の時間です")
-//                .putInt(String.valueOf(NotificationWorker.NOTIFICATION_ID), id)
-//                .build();
-//        OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(
-//                NotificationWorker.class)
-//                .setInitialDelay(delay, TimeUnit.MILLISECONDS)
-//                .setInputData(inputData)
-//                .build();
-//        WorkManager.getInstance(context).enqueueUniqueWork(
-//                "notification_" + id,
-//                ExistingWorkPolicy.REPLACE,
-//                request
-//        );
-//        return request;
-//    }
-
     private static PeriodicWorkRequest createPeriodicWorkRequest(Context context, String title, int delay, int id) {
         // 通知内容を設定
         Data inputData = new Data.Builder()
