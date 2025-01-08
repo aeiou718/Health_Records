@@ -5,13 +5,8 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
-import java.util.List;
-
 @Dao
 public interface DaoDetail {
-    @Query("SELECT * FROM entity_detail")
-    List<EntityDetail> getAll();
-
     @Query("SELECT * FROM entity_detail WHERE id = :id")
     EntityDetail getEdById(int id);
 
