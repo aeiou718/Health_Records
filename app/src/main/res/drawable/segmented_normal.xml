@@ -4,6 +4,6 @@
     <item android:drawable="@drawable/segmented_normal_checked" android:state_checked="true"/>
 
     <!-- 非選択時 -->
-    <item android:drawable="@drawable/segmented_defaults" android:state_checked="false"/>
+    <item android:drawable="@drawable/segmented_normal_unchecked" android:state_checked="false"/>
 
 </selector>

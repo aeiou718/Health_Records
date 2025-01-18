@@ -9,13 +9,10 @@
                 android:bottomRightRadius="10dp"
                 android:topLeftRadius="10dp"
                 android:topRightRadius="10dp" />
-            <solid android:color="@color/bg_bad" />
         </shape>
     </item>
 
     <item>
-        <bitmap
-            android:src="@drawable/mark_face_ase"
-            android:tint="#ffffff" />
+        <bitmap android:src="@drawable/mark_face_ase" />
     </item>
 </layer-list>
