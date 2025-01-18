@@ -1,6 +1,7 @@
 package com.websarva.wings.android.healthrecords;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -101,6 +102,12 @@ public class ViewAdapter extends RecyclerView.Adapter<ViewAdapter.ViewHolder> {
         holder.afternoon.setChecked(tlc_list.get(position).isAfternoon());
         holder.textDay.setText(String.valueOf(day.get(position)));
         holder.textWeek.setText(week.get(position));
+
+        holder.textDay.setOnClickListener(v -> {
+            Intent intent = new Intent(v.getContext(), HealthRecordsDetail.class);
+            intent.putExtra("dayId", tlh_list.get(position).getId());
+            v.getContext().startActivity(intent);
+        });
 
         holder.radioGroup.setOnCheckedChangeListener((group, checkedId) ->
                 executorService.submit(new LevelHealthData(tlh_list.get(position).getId(), dbh, new EntityLevelHealth(checkedId))));
