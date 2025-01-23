@@ -4,11 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.CheckBox;
@@ -145,6 +143,7 @@ public class RecordCalendar extends AppCompatActivity {
         executorService.submit(new DataRead());
     }
 
+    //メニューバーを指定する
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -152,13 +151,7 @@ public class RecordCalendar extends AppCompatActivity {
         return true;
     }
 
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.calendar_main, menu);
-    }
-
+    //メニューバーのアイテム選択時の処理
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
@@ -209,6 +202,7 @@ public class RecordCalendar extends AppCompatActivity {
         }
     }
 
+    //データ読み取り
     class DataRead implements Runnable {
         private List<EntityLevelHealth> elh_list;
         private List<EntityTimeCheck> etc_list;

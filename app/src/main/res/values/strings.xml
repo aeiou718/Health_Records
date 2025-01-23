@@ -5,9 +5,16 @@
     <string name="day">00</string>
     <string name="time">00:00</string>
     <string name="records_default">記録したいこと</string>
+    <string name="notification_alarm">通知</string>
+    <string name="week_list">週間記録</string>
+    <string name="back">戻る</string>
 
     <string name="record_detail">詳細</string>
     <string name="save">保存</string>
 
     <string name="default_day">曜日</string>
+
+    <string name="license">使用素材</string>
+    <string name="irasutoya">いらすとや</string>
+    <string name="license_url">https://www.irasutoya.com/</string>
 </resources>

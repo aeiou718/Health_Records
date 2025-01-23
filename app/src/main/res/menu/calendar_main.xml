@@ -4,11 +4,11 @@
     <item
         android:id="@+id/menu_alarm"
         android:icon="@drawable/alarm_timer"
-        android:title="TODO"
+        android:title="@string/notification_alarm"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/menu_calendar"
         android:icon="@drawable/health_calendar"
-        android:title="TODO"
+        android:title="@string/week_list"
         app:showAsAction="ifRoom" />
 </menu>

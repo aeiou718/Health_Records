@@ -4,7 +4,7 @@
     <item
         android:id="@+id/menu_settings"
         android:icon="@drawable/health_calendar"
-        android:title="TODO"
+        android:title="@string/back"
         app:showAsAction="ifRoom">
     </item>
 </menu>

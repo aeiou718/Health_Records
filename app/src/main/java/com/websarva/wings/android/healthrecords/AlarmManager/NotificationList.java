@@ -6,16 +6,10 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.ContextMenu;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -64,9 +58,14 @@ public class NotificationList extends AppCompatActivity {
 
         executorService = Executors.newSingleThreadExecutor();
         dbn = DataBaseNotificationSingleton.getInstance(getApplicationContext());
-
+        //ツールバー
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
+        toolbar.setNavigationIcon(R.drawable.baseline_arrow_back_24);
+        toolbar.setNavigationOnClickListener(v -> finish());
 
         notificationTimeMorning = findViewById(R.id.morning_notification);
         notificationTimeNoon = findViewById(R.id.noon_notification);
@@ -177,8 +176,9 @@ public class NotificationList extends AppCompatActivity {
                     Date date = format.parse(text);
 
                     Calendar calendar = Calendar.getInstance();
-                    calendar.setTime(date);
-
+                    if (date != null) {
+                        calendar.setTime(date);
+                    }
                     // 時と分を取得
                     int hour = calendar.get(Calendar.HOUR_OF_DAY);
                     int minute = calendar.get(Calendar.MINUTE);
@@ -202,8 +202,9 @@ public class NotificationList extends AppCompatActivity {
                     Date date = format.parse(text);
 
                     Calendar calendar = Calendar.getInstance();
-                    calendar.setTime(date);
-
+                    if (date != null) {
+                        calendar.setTime(date);
+                    }
                     // 時と分を取得
                     int hour = calendar.get(Calendar.HOUR_OF_DAY);
                     int minute = calendar.get(Calendar.MINUTE);
@@ -227,8 +228,9 @@ public class NotificationList extends AppCompatActivity {
                     Date date = format.parse(text);
 
                     Calendar calendar = Calendar.getInstance();
-                    calendar.setTime(date);
-
+                    if (date != null) {
+                        calendar.setTime(date);
+                    }
                     // 時と分を取得
                     int hour = calendar.get(Calendar.HOUR_OF_DAY);
                     int minute = calendar.get(Calendar.MINUTE);
@@ -249,29 +251,6 @@ public class NotificationList extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         executorService.execute(new DataRead(dbn));
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.calendar_list, menu);
-        return true;
-    }
-
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.calendar_list, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int itemId = item.getItemId();
-        if (itemId == R.id.menu_settings) {
-            finish();
-        }
-        return true;
     }
 
     private void cancelSpecificNotification(int notificationId) {
