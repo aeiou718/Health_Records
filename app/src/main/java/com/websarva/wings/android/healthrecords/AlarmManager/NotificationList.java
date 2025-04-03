@@ -98,12 +98,14 @@ public class NotificationList extends AppCompatActivity {
                 int minute_St = picker.getMinute();
                 String formattedTime = String.format(Locale.getDefault(), "%02d:%02d", hour_St, minute_St);
                 notificationTimeMorning.setText(formattedTime);
-                if (notificationSwitchMorning.isChecked()) {
-                    notificationSwitchMorning.setChecked(false);
+                if (!notificationSwitchMorning.isChecked()) {
+                    notificationSwitchMorning.setChecked(true);
                 }
-                executorService.submit(new TimeSetting(dbn, new EntityNotification(hour_St, minute_St, notificationSwitchMorning.isChecked()), 197001011));
+                executorService.submit(new TimeSetting(dbn, new EntityNotification(hour_St, minute_St, true), 197001011));
+                NotificationScheduler.scheduleNotifications(getApplicationContext(), 0, hour, minute);
             });
             picker.show(getSupportFragmentManager(), "time_picker");
+            // 通知を有効にする処理
         });
         notificationTimeNoon.setOnClickListener(view -> {
             SharedPreferences sharedPreferences = getSharedPreferences("notification_time_morning", MODE_PRIVATE);
@@ -169,13 +171,13 @@ public class NotificationList extends AppCompatActivity {
         // 通知のON/OFF
         notificationSwitchMorning.setOnCheckedChangeListener((buttonView, isChecked) -> {
             // 通知のON/OFFを切り替え
+            Calendar calendar = Calendar.getInstance();
             if (isChecked) {
                 String text = notificationTimeMorning.getText().toString();
                 SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.getDefault());
                 try {
                     Date date = format.parse(text);
 
-                    Calendar calendar = Calendar.getInstance();
                     if (date != null) {
                         calendar.setTime(date);
                     }
@@ -185,12 +187,14 @@ public class NotificationList extends AppCompatActivity {
 
                     // 通知を有効にする処理
                     NotificationScheduler.scheduleNotifications(getApplicationContext(), 0, hour, minute);
+//                    executorService.submit(new TimeSetting(dbn, new EntityNotification(hour, minute, true), 197001011));
                 } catch (ParseException e) {
                     Toast.makeText(getApplicationContext(), "エラーが発生しました", Toast.LENGTH_SHORT).show();
                 }
             } else {
                 // 通知を無効にする処理
                 cancelSpecificNotification(197001011); // 通知を取り消す
+//                executorService.submit(new TimeSetting(dbn, new EntityNotification(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false), 197001011));
             }
         });
         notificationSwitchNoon.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -253,6 +257,7 @@ public class NotificationList extends AppCompatActivity {
         executorService.execute(new DataRead(dbn));
     }
 
+    
     private void cancelSpecificNotification(int notificationId) {
         NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(notificationId);
