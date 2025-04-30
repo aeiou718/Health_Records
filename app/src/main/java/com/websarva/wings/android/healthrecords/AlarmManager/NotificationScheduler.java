@@ -63,6 +63,7 @@ public class NotificationScheduler {
                 TimeUnit.HOURS)
                 .setInitialDelay(delay, TimeUnit.MILLISECONDS)
                 .setInputData(inputData)
+                .addTag("notification_" + title)
                 .build();
 
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
