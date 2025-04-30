@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,6 +17,8 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.LiveData;
+import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
 import com.google.android.material.switchmaterial.SwitchMaterial;
@@ -31,6 +34,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -101,8 +105,22 @@ public class NotificationList extends AppCompatActivity {
                 if (!notificationSwitchMorning.isChecked()) {
                     notificationSwitchMorning.setChecked(true);
                 }
+
+                WorkManager workManager = WorkManager.getInstance(getApplicationContext());
+
+                workManager.getWorkInfosByTagLiveData("notification_朝")
+                        .observe(this, workInfos -> {
+                            if (workInfos == null || workInfos.isEmpty()) {
+                                Log.d("WorkManager", "スケジュールされた通知はありません");
+                            } else {
+                                for (WorkInfo workInfo : workInfos) {
+                                    Log.d("WorkManager", "通知の状態: " + workInfo.getState());
+                                }
+                            }
+                        });
+
                 executorService.submit(new TimeSetting(dbn, new EntityNotification(hour_St, minute_St, true), 197001011));
-                NotificationScheduler.scheduleNotifications(getApplicationContext(), 0, hour, minute);
+//                NotificationScheduler.scheduleNotifications(getApplicationContext(), 0, hour, minute);
             });
             picker.show(getSupportFragmentManager(), "time_picker");
             // 通知を有効にする処理
@@ -257,7 +275,13 @@ public class NotificationList extends AppCompatActivity {
         executorService.execute(new DataRead(dbn));
     }
 
-    
+    private class WorkHelper {
+        public static LiveData<List<WorkInfo>> isNotificationScheduled(Context context, String workTag) {
+            return WorkManager.getInstance(context).getWorkInfosByTagLiveData(workTag);
+        }
+
+    }
+
     private void cancelSpecificNotification(int notificationId) {
         NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(notificationId);

@@ -64,16 +64,16 @@ public class RecordCalendarList extends AppCompatActivity {
     }
 
     void dataRead() {
-        executorService.submit(new DataRead());
+        executorService.submit(new DataRead_Week());
     }
 
-    class DataRead implements Runnable {
+    class DataRead_Week implements Runnable {
         private List<EntityLevelHealth> levelHealthList;
         private List<EntityTimeCheck> timeCheckList;
         private final int currentDate;   //カレンダー
         private final int startDate;
 
-        DataRead() {
+        DataRead_Week() {
             // 日曜日の値を入手
             int dayObSat = calendar.get(Calendar.DAY_OF_WEEK);
             while (dayObSat != Calendar.SATURDAY) {
@@ -99,8 +99,6 @@ public class RecordCalendarList extends AppCompatActivity {
 
             Log.d("日付current", String.valueOf(currentDate));
             Log.d("日付start", String.valueOf(startDate));
-
-
         }
 
         @Override
